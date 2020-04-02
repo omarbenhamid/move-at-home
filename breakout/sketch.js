@@ -11,6 +11,29 @@ PoseNet example using p5.js
 let video;
 let poseNet;
 let poses = [];
+
+// Breakout From https://editor.p5js.org/bansal321/sketches/HJAFXebeV
+
+// IN ORDER TO PLAY - CLICK THE ON THE SCREEN
+// MOVE THE PADDLE WITH THE ARROW KEYS
+// SHOOT USING SPACEBAR
+
+let moveMent = 280
+let game = true
+let dx = -6
+let dy = -6
+let score = 0
+let lives = 3
+let livesRestart = false
+const bricks = []
+const brickColors = ["#CCAAFF", "#CCBBFF", "#CCCCFF", "#CCDDFF", "#CCEEFF", "#CCFFFF", "#CCFFEE", "#CCFFDD"];
+
+const circle = {
+  x: moveMent + 50,
+  y: 380,
+  radius: 20
+}
+
 /*
 function setup() {
   createCanvas(640, 480);
@@ -73,31 +96,6 @@ function drawSkeleton() {
       line(partA.position.x, partA.position.y, partB.position.x, partB.position.y);
     }
   }
-}
-
-
-// From https://editor.p5js.org/bansal321/sketches/HJAFXebeV
-
-// IN ORDER TO PLAY - CLICK THE ON THE SCREEN
-// MOVE THE PADDLE WITH THE ARROW KEYS
-// SHOOT USING SPACEBAR
-
-let moveMent = 280
-let rightPress = false
-let leftPress = false
-let game = true
-let dx = -6
-let dy = -6
-let score = 0
-let lives = 3
-let livesRestart = false
-const bricks = []
-const brickColors = ["#CCAAFF", "#CCBBFF", "#CCCCFF", "#CCDDFF", "#CCEEFF", "#CCFFFF", "#CCFFEE", "#CCFFDD"];
-
-const circle = {
-  x: moveMent + 50,
-  y: 380,
-  radius: 20
 }
 
 function setup() {
@@ -191,12 +189,6 @@ function drawBricks() {
 }
 
 function keyPressed(value) {
-  if (value.key === 'ArrowRight') {
-    rightPress = true
-  }
-  if (value.key === 'ArrowLeft') {
-    leftPress = true
-  }
   if (value.keyCode === 32 && livesRestart) {
     livesRestart = false
     circle.x = moveMent + 50
@@ -211,15 +203,6 @@ function keyPressed(value) {
     dy = -6
     moveMent = 250
     createBricks()
-  }
-}
-
-function keyReleased(value) {
-  if (value.key === 'ArrowRight') {
-    rightPress = false
-  }
-  if (value.key === 'ArrowLeft') {
-    leftPress = false
   }
 }
 
@@ -298,5 +281,4 @@ function draw() {
     drawBricks()
     paddle()
   }
-
 }
