@@ -56,7 +56,7 @@ function setup() {
 }*/
 
 function modelReady() {
-  select('#status').html('Model Loaded');
+  //select('#status').html('Model Loaded');
 }
 /*
 function draw() {
@@ -107,11 +107,23 @@ function preload() {
     brickSound = loadSound('brick breaking.mp3');
 }
 
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}
+
+function sx(x) {
+  return width * x/600;
+}
+
+function sy(y) {
+  return height * y / 400;
+}
+
 function setup() {
-  createCanvas(600, 400);
-  createBricks()
+  createCanvas(windowWidth, windowHeight);
+  createBricks();
   video = createCapture(VIDEO);
-  video.size(width, height);
+  video.size(600, 400);
 
   // Create a new poseNet method with a single detection
   poseNet = ml5.poseNet(video, modelReady);
@@ -130,7 +142,7 @@ function paddle() {
   fill('#FF6961')
   if(poses[0])
     moveMent = 500 - (poses[0].pose.leftShoulder.x + poses[0].pose.rightShoulder.x)/2;
-  rect(moveMent, 385, 100, 15, 20)
+  rect(sx(moveMent), sy(385), sx(100), sy(15), 20)
   if(moveMent > 500) moveMent=500;
   if(moveMent < 0) moveMent=0;
 }
@@ -138,26 +150,26 @@ function paddle() {
 function ball() {
   noStroke()
   fill('#FBD8F8')
-  ellipse(circle.x, circle.y, circle.radius, circle.radius)
+  ellipse(sx(circle.x), sy(circle.y), sx(circle.radius), sy(circle.radius))
   if(!poses[0]) return; //Do not move if no pose is detected
   if (circle.y <= 0) {
     bounceSound.play();
     dy = -dy
     score++
   }
-  if (circle.y >= height - 15 && circle.x > moveMent && circle.x <= moveMent + 50) {
+  if (circle.y >= 400 - 15 && circle.x > moveMent && circle.x <= moveMent + 50) {
     bounceSound.play();
     dy = -dy
     if (dx > 0) dx = -dx
     if (dx < 0) dx = dx
   }
-  if (circle.y >= height - 15 && circle.x > moveMent + 50 && circle.x <= moveMent + 100) {
+  if (circle.y >= 400 - 15 && circle.x > moveMent + 50 && circle.x <= moveMent + 100) {
     bounceSound.play();
     dy = -dy
     if (dx > 0) dx = dx
     if (dx < 0) dx = -dx
   }
-  if (circle.x >= width - 10 || circle.x <= 0) {
+  if (circle.x >= 600 - 10 || circle.x <= 0) {
     bounceSound.play();
     dx = -dx
   }
@@ -172,7 +184,7 @@ function ball() {
     }
   })
 
-  if (circle.y > height) {
+  if (circle.y > 400) {
     lives--
     livesRestart = true
     if (lives === 0) game = false
@@ -184,7 +196,7 @@ function ball() {
 function createBricks() {
   const rows = 8
   const cols = 10
-  const brickWidth = width / cols
+  const brickWidth = 600 / cols
   for (let i = 0; i < cols; i++) {
     for (let j = 0; j < rows; j++) {
       let brick = {
@@ -202,7 +214,7 @@ function createBricks() {
 function drawBricks() {
   bricks.forEach(brick => {
     fill(brick.color)
-    rect(brick.x, brick.y, brick.w, brick.h)
+    rect(sx(brick.x), sy(brick.y), sx(brick.w), sy(brick.h),5);
   })
 }
 
@@ -231,12 +243,12 @@ function restartGame() {
   textStyle(BOLD);
   textFont('Arial');
   textSize(38)
-  text('GAME OVER', 300, 170)
+  text('GAME OVER', sx(300), sy(170))
   textFont('Arial');
   textSize(28);
-  text('Final score: ' + score, 300, 200);
+  text('Final score: ' + score, sx(300), sy(200));
   textSize(18);
-  text('Press SpaceBar to restart game', 300, 225);
+  text('Press SpaceBar to restart game', sx(300), sy(225));
 }
 
 function lostLifeText() {
@@ -246,12 +258,23 @@ function lostLifeText() {
   textStyle(BOLD);
   textFont('Arial');
   textSize(36)
-  text('Life Lost', 300, 170)
+  text('Life Lost', sx(300), sy(170))
   textFont('Arial');
   textSize(24);
-  text('You now have ' + lives + ' lives remaining', 300, 200);
+  text('You now have ' + lives + ' lives remaining', sx(300), sy(200));
   textSize(18);
-  text('Press SpaceBar to restart', 300, 225);
+  text('Press SpaceBar to restart', sx(300), sy(225));
+}
+
+
+function notDetectedText() {
+  fill('#FFEEEE')
+  textAlign(CENTER);
+  noStroke()
+  textStyle(BOLD);
+  textFont('Arial');
+  textSize(36)
+  text('Detecting ...', sx(300), sy(170))
 }
 
 function scoreText() {
@@ -261,7 +284,7 @@ function scoreText() {
   noStroke()
   textFont('Arial');
   textSize(18);
-  text('Score: ' + score, 555, 20);
+  text('Score: ' + score, sx(555), sy(20));
 }
 
 function livesText() {
@@ -270,7 +293,7 @@ function livesText() {
   noStroke()
   textFont('Arial');
   textSize(18);
-  text('Lives: ' + lives, 40, 20);
+  text('Lives: ' + lives, sx(40), sy(20));
 }
 
 function checkCollisionBottom(ball, brick) {
@@ -289,10 +312,14 @@ function draw() {
 
   //drawKeypoints();
   //drawSkeleton();
-
   if (game && !livesRestart) ball()
-  if (livesRestart && game) lostLifeText()
-  if (!game && livesRestart) restartGame()
+  if(!poses[0]) {
+    notDetectedText();
+  } else {
+    if (livesRestart && game) lostLifeText()
+    if (!game && livesRestart) restartGame()
+  }
+
   if (game) {
     scoreText()
     livesText()
