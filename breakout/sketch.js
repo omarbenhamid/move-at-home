@@ -25,6 +25,10 @@ let dy = -6
 let score = 0
 let lives = 3
 let livesRestart = false
+
+let bounceSound;
+let brickSound;
+
 const bricks = []
 const brickColors = ["#CCAAFF", "#CCBBFF", "#CCCCFF", "#CCDDFF", "#CCEEFF", "#CCFFFF", "#CCFFEE", "#CCFFDD"];
 
@@ -98,6 +102,11 @@ function drawSkeleton() {
   }
 }
 
+function preload() {
+    bounceSound = loadSound('bounce.mp3');
+    brickSound = loadSound('brick breaking.mp3');
+}
+
 function setup() {
   createCanvas(600, 400);
   createBricks()
@@ -113,6 +122,7 @@ function setup() {
   });
   // Hide the video element, and just show the canvas
   video.hide();
+
 }
 
 function paddle() {
@@ -131,26 +141,34 @@ function ball() {
   ellipse(circle.x, circle.y, circle.radius, circle.radius)
   if(!poses[0]) return; //Do not move if no pose is detected
   if (circle.y <= 0) {
+    bounceSound.play();
     dy = -dy
     score++
   }
   if (circle.y >= height - 15 && circle.x > moveMent && circle.x <= moveMent + 50) {
+    bounceSound.play();
     dy = -dy
     if (dx > 0) dx = -dx
     if (dx < 0) dx = dx
   }
   if (circle.y >= height - 15 && circle.x > moveMent + 50 && circle.x <= moveMent + 100) {
+    bounceSound.play();
     dy = -dy
     if (dx > 0) dx = dx
     if (dx < 0) dx = -dx
   }
-  if (circle.x >= width - 10 || circle.x <= 0) dx = -dx
+  if (circle.x >= width - 10 || circle.x <= 0) {
+    bounceSound.play();
+    dx = -dx
+  }
 
   bricks.forEach((item, index) => {
   	if(checkCollisionBottom(circle, item)){
       dy = -dy
     	score++
       bricks.splice(index, 1)
+
+      brickSound.play()
     }
   })
 
