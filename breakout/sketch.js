@@ -24,10 +24,12 @@ let dx = -6
 let dy = -6
 let score = 0
 let lives = 3
-let livesRestart = false
+let livesRestart = true
 
 let bounceSound;
 let brickSound;
+
+let triggerAction;
 
 const bricks = []
 const brickColors = ["#CCAAFF", "#CCBBFF", "#CCCCFF", "#CCDDFF", "#CCEEFF", "#CCFFFF", "#CCFFEE", "#CCFFDD"];
@@ -131,10 +133,28 @@ function setup() {
   // with an array every time new poses are detected
   poseNet.on('pose', function(results) {
     poses = results;
+    if(poses[0]) {
+        interpretPose(poses[0].pose)
+    }
   });
   // Hide the video element, and just show the canvas
   video.hide();
 
+}
+
+let MIN_CONFIDENCE=0.5;
+function interpretPose(pose) {
+  let wry,shy,shw;
+  if(pose.leftWrist.confidence > MIN_CONFIDENCE) {
+    wry = pose.leftWrist.y;
+  }else if(pose.rightWrist.confidence > MIN_CONFIDENCE) {
+    wry = pose.rightWrist.y;
+  }else return;
+
+  shw = Math.abs(pose.leftShoulder.x - pose.rightShoulder.x);
+  shy = (pose.leftShoulder.y + pose.rightShoulder.y) / 2;
+
+  if((shy - wry) > (shw /2)) triggerAction = true;
 }
 
 function paddle() {
@@ -219,21 +239,7 @@ function drawBricks() {
 }
 
 function keyPressed(value) {
-  if (value.keyCode === 32 && livesRestart) {
-    livesRestart = false
-    circle.x = moveMent + 50
-    circle.y = 380
-  }
-  if (value.keyCode === 32 && !game) {
-    game = true
-    circle.x = moveMent + 50
-    circle.y = 380
-    score = 0
-    lives = 3
-    dy = -6
-    moveMent = 250
-    createBricks()
-  }
+  if(value.keyCode === 32) triggerAction = true;
 }
 
 function restartGame() {
@@ -248,7 +254,7 @@ function restartGame() {
   textSize(28);
   text('Final score: ' + score, sx(300), sy(200));
   textSize(18);
-  text('Press SpaceBar to restart game', sx(300), sy(225));
+  text('Press SpaceBar or hold your hands up to restart game', sx(300), sy(225));
 }
 
 function lostLifeText() {
@@ -256,14 +262,14 @@ function lostLifeText() {
   textAlign(CENTER);
   noStroke()
   textStyle(BOLD);
-  textFont('Arial');
-  textSize(36)
-  text('Life Lost', sx(300), sy(170))
+  //textFont('Arial');
+  //textSize(36)
+  //text('Life Lost', sx(300), sy(170))
   textFont('Arial');
   textSize(24);
   text('You now have ' + lives + ' lives remaining', sx(300), sy(200));
   textSize(18);
-  text('Press SpaceBar to restart', sx(300), sy(225));
+  text('Press SpaceBar or hold your hands up to start', sx(300), sy(225));
 }
 
 
@@ -303,15 +309,34 @@ function checkCollisionBottom(ball, brick) {
 }
 
 function draw() {
-  /*
-  image(video, 0, 0, width, height);
-  */
-  // We can call both functions to draw all keypoints and the skeletons
+  if (triggerAction && livesRestart) {
+    livesRestart = false
+    circle.x = moveMent + 50
+    circle.y = 380
+  }
+  if (triggerAction && !game) {
+    game = true
+    circle.x = moveMent + 50
+    circle.y = 380
+    score = 0
+    lives = 3
+    dy = -6
+    moveMent = 250
+    createBricks()
+  }
+  triggerAction = false;
 
-  background('#779ecb');
-
-  //drawKeypoints();
-  //drawSkeleton();
+  if(game && !livesRestart && poses[0]) {
+    background('#000000');
+  }else{
+    push();
+    translate(width,0);
+    scale(-width/600,height/400);
+    image(video, 0, 0, 600, 400);
+    drawKeypoints();
+    drawSkeleton();
+    pop();
+  }
   if (game && !livesRestart) ball()
   if(!poses[0]) {
     notDetectedText();
@@ -324,6 +349,6 @@ function draw() {
     scoreText()
     livesText()
     drawBricks()
-    paddle()
   }
+  paddle()
 }
