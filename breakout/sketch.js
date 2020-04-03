@@ -17,6 +17,7 @@ let poses = [];
 // IN ORDER TO PLAY - CLICK THE ON THE SCREEN
 // MOVE THE PADDLE WITH THE ARROW KEYS
 // SHOOT USING SPACEBAR
+let flip = (location.hash == "#flip")
 
 let moveMent = 280
 let game = true
@@ -161,7 +162,8 @@ function paddle() {
   stroke('purple')
   fill('#FF6961')
   if(poses[0])
-    moveMent = 500 - (poses[0].pose.leftShoulder.x + poses[0].pose.rightShoulder.x)/2;
+    moveMent = (poses[0].pose.leftShoulder.x + poses[0].pose.rightShoulder.x)/2;
+    if(!flip) moveMent =  500 - moveMent;
   rect(sx(moveMent), sy(385), sx(100), sy(15), 20)
   if(moveMent > 500) moveMent=500;
   if(moveMent < 0) moveMent=0;
@@ -269,7 +271,7 @@ function lostLifeText() {
   textSize(24);
   text('You now have ' + lives + ' lives remaining', sx(300), sy(200));
   textSize(18);
-  text('Press SpaceBar or hold your hands up to start', sx(300), sy(225));
+  text('Press SpaceBar or hold your hands up to start' + (!flip?", add #flip to url and reload if webcam is behind.":"."), sx(300), sy(225));
 }
 
 
