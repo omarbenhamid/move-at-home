@@ -41,36 +41,6 @@ const circle = {
   radius: 20
 }
 
-/*
-function setup() {
-  createCanvas(640, 480);
-  video = createCapture(VIDEO);
-  video.size(width, height);
-
-  // Create a new poseNet method with a single detection
-  poseNet = ml5.poseNet(video, modelReady);
-  // This sets up an event that fills the global variable "poses"
-  // with an array every time new poses are detected
-  poseNet.on('pose', function(results) {
-    poses = results;
-  });
-  // Hide the video element, and just show the canvas
-  video.hide();
-}*/
-
-function modelReady() {
-  //select('#status').html('Model Loaded');
-}
-/*
-function draw() {
-  image(video, 0, 0, width, height);
-
-  // We can call both functions to draw all keypoints and the skeletons
-  drawKeypoints();
-  drawSkeleton();
-}
-*/
-
 // A function to draw ellipses over the detected keypoints
 function drawKeypoints()  {
   // Loop through all the poses detected
@@ -129,7 +99,9 @@ function setup() {
   video.size(600, 400);
 
   // Create a new poseNet method with a single detection
-  poseNet = ml5.poseNet(video, modelReady);
+  poseNet = ml5.poseNet(video, {
+      detectionType: 'single'
+  });
   // This sets up an event that fills the global variable "poses"
   // with an array every time new poses are detected
   poseNet.on('pose', function(results) {
@@ -160,10 +132,11 @@ function interpretPose(pose) {
 
 function paddle() {
   stroke('purple')
-  fill('#FF6961')
-  if(poses[0])
-    moveMent = (poses[0].pose.leftShoulder.x + poses[0].pose.rightShoulder.x)/2;
+  fill('#FFFFFF')
+  if(poses[0]) {
+    moveMent = (poses[0].pose.leftShoulder.x + poses[0].pose.rightShoulder.x)/2-50;
     if(!flip) moveMent =  500 - moveMent;
+  }
   rect(sx(moveMent), sy(385), sx(100), sy(15), 20)
   if(moveMent > 500) moveMent=500;
   if(moveMent < 0) moveMent=0;
@@ -330,6 +303,14 @@ function draw() {
 
   if(game && !livesRestart && poses[0]) {
     background('#000000');
+    push();
+    translate(width,0);
+    scale(-width/3/600,height/3/400);
+    translate(0,2*400);
+    image(video, 0, 0, 600, 400);
+    drawKeypoints();
+    drawSkeleton();
+    pop();
   }else{
     push();
     translate(width,0);
